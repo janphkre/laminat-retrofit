@@ -7,6 +7,7 @@ import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArrays
 import com.janphkre.laminat.retrofit.annotations.body.MatchBodyRegexes
 import com.janphkre.laminat.retrofit.annotations.body.MatchRegex
 import com.janphkre.laminat.retrofit.dsl.on
+import org.apache.http.Consts
 import org.junit.Assert
 import org.junit.Test
 import retrofit2.Retrofit
@@ -14,6 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 import java.io.File
+import java.nio.charset.Charset
 
 class RetrofitDslTest {
 
@@ -65,8 +67,8 @@ class RetrofitDslTest {
         val outputPactFile = File("pacts/$expectedPact")
         Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
 
-        val outputPact = readFile(outputPactFile)
-        val expectedPact = readFile(File("src/test/assets/$expectedPact"))
+        val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = File("src/test/assets/$expectedPact").readText(Charset.forName(Consts.UTF_8.name()))
         Assert.assertEquals("Generated pact does not match expectations!", expectedPact, outputPact)
     }
 }

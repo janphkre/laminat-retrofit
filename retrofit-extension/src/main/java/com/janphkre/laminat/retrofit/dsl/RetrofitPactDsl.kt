@@ -48,6 +48,11 @@ class RetrofitPactDsl(
     }
 
     private fun raiseException(message: String, cause: Exception? = null): Nothing {
-        throw PactBuildException("$message in $retrofitMethod", cause)
+        if(cause is PactBuildException) {
+            throw cause
+        }
+        else {
+            throw PactBuildException("$message in $retrofitMethod", cause)
+        }
     }
 }
