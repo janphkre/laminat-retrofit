@@ -4,8 +4,7 @@ import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithPath
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath
 import au.com.dius.pact.consumer.dsl.PactDslResponse
-import au.com.dius.pact.external.PactBuildException
-import com.janphkre.laminat.retrofit.annotations.*
+import com.janphkre.laminat.retrofit.annotations.Annotations
 import com.janphkre.laminat.retrofit.body.BodyMatchElement
 import com.janphkre.laminat.retrofit.body.RetrofitPactDslBodyCreator
 import okhttp3.RetrofitPactRequestWithParams
@@ -31,7 +30,7 @@ class RetrofitPactDslWithParams(
             }
             .apply {
                 retrofitRequest.headers.forEach { header ->
-                    if (annotations.excludeHeaders[header.first] == null) {
+                    if (annotations.excludeHeaders[header.first] != null) {
                         return@forEach
                     }
                     val regex = annotations.headerRegexes[header.first]
@@ -72,9 +71,5 @@ class RetrofitPactDslWithParams(
      */
     fun willRespondWith(): PactDslResponse {
         return toPactDsl().willRespondWith()
-    }
-
-    private fun raiseException(message: String, cause: Exception? = null): Nothing {
-        throw PactBuildException("$message on $retrofitMethod", cause)
     }
 }
