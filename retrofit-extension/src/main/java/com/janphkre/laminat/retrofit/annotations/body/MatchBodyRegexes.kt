@@ -1,6 +1,4 @@
-package com.janphkre.laminat.retrofit.annotations
-
-import com.janphkre.laminat.retrofit.annotations.data.MatchRegex
+package com.janphkre.laminat.retrofit.annotations.body
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

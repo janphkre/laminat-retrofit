@@ -1,9 +1,7 @@
-package com.janphkre.laminat.retrofit.annotations
-
-import com.janphkre.laminat.retrofit.annotations.data.MaxArray
+package com.janphkre.laminat.retrofit.annotations.body
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class MatchBodyMaxArrays(
-    val values: Array<MaxArray>
+    val values: Array<MatchBodyMaxArray>
 )

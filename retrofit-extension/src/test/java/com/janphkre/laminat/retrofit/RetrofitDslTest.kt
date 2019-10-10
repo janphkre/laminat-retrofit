@@ -2,10 +2,11 @@ package com.janphkre.laminat.retrofit
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.external.PactJsonifier
-import com.janphkre.laminat.retrofit.annotations.MatchBodyMinArrays
-import com.janphkre.laminat.retrofit.annotations.MatchBodyRegexes
-import com.janphkre.laminat.retrofit.annotations.data.MatchRegex
-import com.janphkre.laminat.retrofit.annotations.data.MinArray
+import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArray
+import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArrays
+import com.janphkre.laminat.retrofit.annotations.body.MatchBodyRegexes
+import com.janphkre.laminat.retrofit.annotations.body.MatchRegex
+import com.janphkre.laminat.retrofit.dsl.on
 import org.junit.Assert
 import org.junit.Test
 import retrofit2.Retrofit
@@ -29,10 +30,13 @@ class RetrofitDslTest {
     interface TestApi {
         @POST("api/v1/example")
         @MatchBodyRegexes([
-            MatchRegex("$.def", "[0-9]{2}\\.[0-9]{2}\\.[0-9]{4}"),
+            MatchRegex(
+                "$.def",
+                "[0-9]{2}\\.[0-9]{2}\\.[0-9]{4}"
+            ),
             MatchRegex("$.jkl[*]", "Hello.*")
         ])
-        @MatchBodyMinArrays([MinArray("$.ghi", 1)])
+        @MatchBodyMinArrays([MatchBodyMinArray("$.ghi", 1)])
         fun getExample(@Body body: SomeOtherThing): Something
     }
 

@@ -27,10 +27,11 @@ repositories {
 }
 
 dependencies {
-//    implementation project(':laminat')
     api "com.github.janphkre:laminat:${rootProject.ext.pact_version}"
     api "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     testImplementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    testImplementation "junit:junit:$test_junit_version"
+    testImplementation "org.json:json:$test_json_version"
 }

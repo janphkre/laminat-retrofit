@@ -1,6 +1,9 @@
 package com.janphkre.laminat.retrofit.body
 
 import au.com.dius.pact.external.PactBuildException
+import com.janphkre.laminat.retrofit.annotations.body.IMatchArray
+import com.janphkre.laminat.retrofit.annotations.body.MaxArray
+import com.janphkre.laminat.retrofit.annotations.body.MinArray
 import java.util.LinkedList
 
 sealed class BodyMatchElement {
@@ -160,13 +163,13 @@ sealed class BodyMatchElement {
         private const val MAX_ITEM_STRING_LENGTH = 7
         private const val MAX_OBJECT_STRING_LENGTH = 21
 
-        fun from(matchRegexes: Map<String, String>, matchArrays: Map<String, Int>): BodyMatchElement? {
+        fun from(matchRegexes: Map<String, String>, matchArrays: Map<String, IMatchArray>): BodyMatchElement? {
             val startingPoints = LinkedList<BodyMatchElement>()
             matchArrays.forEach { matchArrayPair ->
-                val startElement = if (matchArrayPair.value > 0) {
-                    BodyMatchMaxArray(null, matchArrayPair.value)
-                } else {
-                    BodyMatchMinArray(null, -matchArrayPair.value)
+                val startElement = when (val arrayValue = matchArrayPair.value) {
+                    is MaxArray -> BodyMatchMaxArray(null, arrayValue.maxCount)
+                    is MinArray -> BodyMatchMinArray(null, arrayValue.minCount)
+                    else -> throw PactBuildException("Unsupported array type ${arrayValue.javaClass.name}")
                 }
                 val resultMatch = buildMatch(splitPath(matchArrayPair.key), startElement)
                 startingPoints.addMatch(resultMatch)
