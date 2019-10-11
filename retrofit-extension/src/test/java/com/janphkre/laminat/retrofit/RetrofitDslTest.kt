@@ -6,6 +6,8 @@ import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArray
 import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArrays
 import com.janphkre.laminat.retrofit.annotations.body.MatchBodyRegexes
 import com.janphkre.laminat.retrofit.annotations.body.MatchRegex
+import com.janphkre.laminat.retrofit.annotations.header.MatchHeader
+import com.janphkre.laminat.retrofit.annotations.header.MatchHeaders
 import com.janphkre.laminat.retrofit.dsl.on
 import org.apache.http.Consts
 import org.junit.Assert
@@ -15,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import java.io.File
 import java.nio.charset.Charset
@@ -51,6 +54,10 @@ class RetrofitDslTest {
         ): Something
 
         @POST("api/v1/emptyExample")
+        @MatchHeaders([
+            MatchHeader("X-Foo", "Bar")
+        ])
+        @Headers("X-Foo: Bar")
         fun postEmptyExample(): Something
     }
 
@@ -112,7 +119,7 @@ class RetrofitDslTest {
     fun retrofit_InstanciatePact_MatchesEmptyExampleRequest() {
         val pactInteraction = ConsumerPactBuilder("testretrofitconsumer")
             .hasPactWith("testretrofitprovider")
-            .uponReceiving("POST form example")
+            .uponReceiving("POST empty example")
             .on(retrofitInstance)
             .match(TestApi::postEmptyExample)
             .willRespondWith()

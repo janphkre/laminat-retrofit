@@ -7,14 +7,29 @@
   },
   "interactions": [
     {
-      "description": "POST form example",
+      "description": "POST empty example",
       "request": {
         "method": "POST",
         "path": "/api/v1/emptyExample",
         "headers": {
+          "X-Foo": "Bar",
           "Content-Type": "application/json; charset\u003dUTF-8"
         },
-        "body": ""
+        "body": "",
+        "matchingRules": {
+          "header": {
+            "X-Foo": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bar"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {}
+        }
       },
       "response": {
         "status": 200,
