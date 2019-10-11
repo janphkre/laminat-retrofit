@@ -4,6 +4,7 @@ import au.com.dius.pact.external.PactBuildException
 import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.RetrofitPactRequestWithParams
+import org.apache.http.entity.ContentType
 import java.lang.reflect.Method
 
 class RetrofitPactRequest(
@@ -40,9 +41,7 @@ class RetrofitPactRequest(
 
     fun applyParameterValues(vararg args: Any?): RetrofitPactRequestWithParams {
         var argumentCount = args.size
-        if (argumentCount != parameterHandlers.size) {
-            throw IllegalArgumentException("Argument count ($argumentCount) doesn't match expected count (${parameterHandlers.size})")
-        }
+        require(argumentCount == parameterHandlers.size) { "Argument count ($argumentCount) doesn't match expected count (${parameterHandlers.size})" }
         val requestBuilder = RequestBuilder(httpMethod, retrofit.baseUrl, relativeUrl,
             headers, contentType, hasBody, isFormEncoded, isMultipart)
         if (isKotlinSuspendFunction) {
@@ -54,6 +53,10 @@ class RetrofitPactRequest(
             parameterHandlers[argumentIndex].apply(requestBuilder, args[argumentIndex])
         }
 
+        when {
+            isFormEncoded -> requestBuilder.addHeader(ContentType.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+            isMultipart -> requestBuilder.addHeader(ContentType.CONTENT_TYPE, ContentType.MULTIPART_FORM_DATA.toString())
+        }
         return RetrofitPactRequestWithParams(requestBuilder.get())
     }
 }
