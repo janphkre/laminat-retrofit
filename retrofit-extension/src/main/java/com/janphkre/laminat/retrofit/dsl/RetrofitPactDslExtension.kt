@@ -3,7 +3,6 @@ package com.janphkre.laminat.retrofit.dsl
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.external.PactBuildException
-import okhttp3.Interceptor
 import retrofit2.Retrofit
 import java.lang.reflect.Method
 import kotlin.reflect.KFunction
@@ -36,6 +35,6 @@ fun PactDslRequestWithoutPath.uponReceiving(retrofitMethod: Method): RetrofitPac
 }
 
 @Suppress("unused")
-fun PactDslRequestWithoutPath.on(retrofit: Retrofit, interceptors: List<Interceptor>): RetrofitPactDslWithoutMethod {
+fun PactDslRequestWithoutPath.on(retrofit: Retrofit): RetrofitPactDslWithoutMethod {
     return RetrofitPactDslWithoutMethod(this, retrofit)
 }
