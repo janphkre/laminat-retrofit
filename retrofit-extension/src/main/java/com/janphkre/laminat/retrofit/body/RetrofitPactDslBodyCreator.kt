@@ -31,7 +31,7 @@ class RetrofitPactDslBodyCreator(
             this[ContentType.APPLICATION_JSON.mimeType] = DslJsonBodyConverter
             this[ContentType.APPLICATION_JSONREQUEST.mimeType] = DslJsonBodyConverter
             this[ContentType.APPLICATION_JSON_RPC.mimeType] = DslJsonBodyConverter
-            this[ContentType.APPLICATION_FORM_URLENCODED.mimeType] = DslFormUrlBodyConverter
+            this[ContentType.APPLICATION_FORM_URLENCODED.mimeType] = DslPlainTextBodyConverter
             this[ContentType.TEXT_PLAIN.mimeType] = DslPlainTextBodyConverter
         }
 
