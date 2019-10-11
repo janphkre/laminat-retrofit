@@ -1,0 +1,33 @@
+{
+  "provider": {
+    "name": "testretrofitprovider"
+  },
+  "consumer": {
+    "name": "testretrofitconsumer"
+  },
+  "interactions": [
+    {
+      "description": "POST form example",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/emptyExample",
+        "headers": {
+          "Content-Type": "application/json; charset\u003dUTF-8"
+        },
+        "body": ""
+      },
+      "response": {
+        "status": 200,
+        "body": {}
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "3.0.0"
+    },
+    "pact-laminat-android": {
+      "version": "3.5.10"
+    }
+  }
+}

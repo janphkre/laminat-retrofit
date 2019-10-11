@@ -12,7 +12,7 @@ import java.lang.reflect.Method
 
 class RetrofitPactDslWithParams(
     private val pactDslRequestWithoutPath: PactDslRequestWithoutPath,
-    private val retrofitMethod: Method,
+    retrofitMethod: Method,
     private val retrofitRequest: RetrofitPactRequestWithParams
 ) {
 

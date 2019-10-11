@@ -13,7 +13,7 @@ class RetrofitPactDslBodyCreator(
 
     fun create(): DslPart? {
         if (retrofitBody.contentLength() == 0L) {
-            return PactDslRootValue.stringType("")
+            return PactDslRootValue().apply { setValue("") }
         }
         val contentTypeString = retrofitBody.contentType()?.let { "${it.type()}/${it.subtype()}" }
         return Buffer().use { retrofitBodyBuffer ->
