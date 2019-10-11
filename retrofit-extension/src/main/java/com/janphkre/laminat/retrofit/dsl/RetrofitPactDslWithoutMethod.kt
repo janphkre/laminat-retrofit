@@ -12,15 +12,13 @@ class RetrofitPactDslWithoutMethod(
     private val retrofit: Retrofit
 ) {
 
+    @Suppress("unused")
     fun <T> match(retrofitMethod: KFunction<T>): RetrofitPactDsl {
         val javaRetrofitMethod = retrofitMethod.javaMethod ?: throw PactBuildException("The given method $retrofitMethod can not be represented by a java method!")
-        return RetrofitPactDsl(
-            pactDslRequestWithoutPath,
-            javaRetrofitMethod,
-            retrofit
-        )
+        return match(javaRetrofitMethod)
     }
 
+    @Suppress("unused")
     fun match(retrofitMethod: Method): RetrofitPactDsl {
         return RetrofitPactDsl(
             pactDslRequestWithoutPath,

@@ -25,6 +25,7 @@ class RetrofitPactDsl(
         }
     }
 
+    @Suppress("unused")
     fun withParameters(vararg parameterValues: Any?): RetrofitPactDslWithParams {
         val paramsRetrofitRequest = try {
             retrofitRequest.applyParameterValues(*parameterValues)
@@ -39,10 +40,12 @@ class RetrofitPactDsl(
         )
     }
 
+    @Suppress("unused")
     fun body(dslPart: DslPart): PactDslRequestWithPath {
         return withParameters().body(dslPart)
     }
 
+    @Suppress("unused")
     fun willRespondWith(): PactDslResponse {
         return withParameters().willRespondWith()
     }

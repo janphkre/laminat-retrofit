@@ -19,6 +19,10 @@ class RetrofitPactDslWithParams(
     private val anyMatchRegex = ".*"
     private val annotations = Annotations(retrofitMethod)
 
+    /**
+     * Converts the retrofit pact dsl back to a pact dsl.
+     */
+    @Suppress("unused")
     fun toPactDsl(): PactDslRequestWithPath {
         val intermediatePact = pactDslRequestWithoutPath.method(retrofitRequest.method)
             .let { pactDsl ->
@@ -60,15 +64,13 @@ class RetrofitPactDslWithParams(
             }
         }
     }
+    @Suppress("unused")
 
     fun body(dslPart: DslPart): PactDslRequestWithPath {
         return toPactDsl().body(dslPart)
     }
 
-    /**
-     * Converts the retrofit pact dsl back to a pact dsl.
-     * matchPath is unsupported at the moment.
-     */
+    @Suppress("unused")
     fun willRespondWith(): PactDslResponse {
         return toPactDsl().willRespondWith()
     }

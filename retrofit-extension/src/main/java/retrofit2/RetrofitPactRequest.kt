@@ -41,7 +41,7 @@ class RetrofitPactRequest(
     fun applyParameterValues(vararg args: Any?): RetrofitPactRequestWithParams {
         var argumentCount = args.size
         if (argumentCount != parameterHandlers.size) {
-            throw IllegalArgumentException("Argument count ($argumentCount) doesn't match expected count (${parameterHandlers.size}")
+            throw IllegalArgumentException("Argument count ($argumentCount) doesn't match expected count (${parameterHandlers.size})")
         }
         val requestBuilder = RequestBuilder(httpMethod, retrofit.baseUrl, relativeUrl,
             headers, contentType, hasBody, isFormEncoded, isMultipart)
