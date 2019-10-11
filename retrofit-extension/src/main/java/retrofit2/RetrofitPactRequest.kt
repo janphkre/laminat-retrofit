@@ -53,10 +53,11 @@ class RetrofitPactRequest(
             parameterHandlers[argumentIndex].apply(requestBuilder, args[argumentIndex])
         }
 
+        val request = requestBuilder.get()
         when {
-            isFormEncoded -> requestBuilder.addHeader(ContentType.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
-            isMultipart -> requestBuilder.addHeader(ContentType.CONTENT_TYPE, ContentType.MULTIPART_FORM_DATA.toString())
+            isFormEncoded -> request.addHeader(ContentType.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+            isMultipart -> request.addHeader(ContentType.CONTENT_TYPE, ContentType.MULTIPART_FORM_DATA.toString())
         }
-        return RetrofitPactRequestWithParams(requestBuilder.get())
+        return RetrofitPactRequestWithParams(request.build())
     }
 }

@@ -13,6 +13,8 @@ import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import java.io.File
 import java.nio.charset.Charset
@@ -32,14 +34,21 @@ class RetrofitDslTest {
     interface TestApi {
         @POST("api/v1/example")
         @MatchBodyRegexes([
-            MatchRegex(
-                "$.def",
-                "[0-9]{2}\\.[0-9]{2}\\.[0-9]{4}"
-            ),
+            MatchRegex("$.def", "[0-9]{2}\\.[0-9]{2}\\.[0-9]{4}"),
             MatchRegex("$.jkl[*]", "Hello.*")
         ])
         @MatchBodyMinArrays([MatchBodyMinArray("$.ghi", 1)])
-        fun getExample(@Body body: SomeOtherThing): Something
+        fun postExample(@Body body: SomeOtherThing): Something
+
+        @POST("api/v1/formExample")
+        @FormUrlEncoded
+        @MatchBodyRegexes([
+            MatchRegex("$", "field1=.*&field2=.*")
+        ])
+        fun postFormExample(
+            @Field("field1") field1: String,
+            @Field("field2") field2: String
+        ): Something
     }
 
     private val retrofitInstance = Retrofit.Builder()
@@ -54,7 +63,7 @@ class RetrofitDslTest {
             .hasPactWith("testretrofitprovider")
             .uponReceiving("POST example")
             .on(retrofitInstance)
-            .match(TestApi::getExample)
+            .match(TestApi::postExample)
             .withParameters(SomeOtherThing("01.01.2000", arrayOf(SomeThirdThing("String1")), arrayOf("Hello1", "Hello2")))
             .willRespondWith()
             .status(200)
@@ -68,7 +77,31 @@ class RetrofitDslTest {
         Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
 
         val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
-        val expectedPact = File("src/test/assets/$expectedPact").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = File("src/test/assets/pact:jsonexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        Assert.assertEquals("Generated pact does not match expectations!", expectedPact, outputPact)
+    }
+
+    @Test
+    fun retrofit_InstanciatePact_MatchesFormExampleRequest() {
+        val pactInteraction = ConsumerPactBuilder("testretrofitconsumer")
+            .hasPactWith("testretrofitprovider")
+            .uponReceiving("POST form example")
+            .on(retrofitInstance)
+            .match(TestApi::postFormExample)
+            .withParameters("Hello1","Hello2")
+            .willRespondWith()
+            .status(200)
+            .body("{}")
+            .toPact()
+
+        Assert.assertNotNull(pactInteraction)
+
+        PactJsonifier.generateJson(listOf(pactInteraction), File("pacts"))
+        val outputPactFile = File("pacts/$expectedPact")
+        Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
+
+        val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = File("src/test/assets/pact:formexample.json").readText(Charset.forName(Consts.UTF_8.name()))
         Assert.assertEquals("Generated pact does not match expectations!", expectedPact, outputPact)
     }
 }
