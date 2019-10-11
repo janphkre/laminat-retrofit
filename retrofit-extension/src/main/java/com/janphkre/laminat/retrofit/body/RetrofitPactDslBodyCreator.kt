@@ -1,24 +1,21 @@
 package com.janphkre.laminat.retrofit.body
 
 import au.com.dius.pact.consumer.dsl.DslPart
-import au.com.dius.pact.external.PactBuildException
+import au.com.dius.pact.consumer.dsl.PactDslRootValue
 import okhttp3.RequestBody
 import okio.Buffer
 import org.apache.http.entity.ContentType
-import java.lang.reflect.Method
 
 class RetrofitPactDslBodyCreator(
-    private val retrofitMethod: Method,
     private val retrofitBody: RequestBody,
     private val bodyMatches: BodyMatchElement?
 ) {
 
     fun create(): DslPart? {
-        val contentType = retrofitBody.contentType() ?: throw PactBuildException("No content type specified on request body in $retrofitMethod")
         if (retrofitBody.contentLength() == 0L) {
-            return null
+            return PactDslRootValue.stringType("")
         }
-        val contentTypeString = "${contentType.type()}/${contentType.subtype()}"
+        val contentTypeString = retrofitBody.contentType()?.let { "${it.type()}/${it.subtype()}" }
         return Buffer().use { retrofitBodyBuffer ->
             retrofitBody.writeTo(retrofitBodyBuffer)
             val dslBodyConverter: DslBodyConverter = dslBodies[contentTypeString] ?: DslPlainTextBodyConverter

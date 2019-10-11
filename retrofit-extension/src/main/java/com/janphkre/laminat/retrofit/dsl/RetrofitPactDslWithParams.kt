@@ -54,7 +54,6 @@ class RetrofitPactDslWithParams(
             return intermediatePact
         }
         val dslBody = RetrofitPactDslBodyCreator(
-            retrofitMethod,
             retrofitRequest.body,
             BodyMatchElement.from(annotations.bodyRegexes, annotations.bodyArrays)
         ).create()
