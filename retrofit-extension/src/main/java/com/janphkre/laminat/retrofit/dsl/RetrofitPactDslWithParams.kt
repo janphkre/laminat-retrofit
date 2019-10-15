@@ -63,8 +63,8 @@ class RetrofitPactDslWithParams(
             }
         }
     }
-    @Suppress("unused")
 
+    @Suppress("unused")
     fun body(dslPart: DslPart): PactDslRequestWithPath {
         return toPactDsl().body(dslPart)
     }

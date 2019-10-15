@@ -22,6 +22,7 @@ sealed class BodyMatchElement {
 
     abstract fun equalsType(other: BodyMatchElement): Boolean
     abstract fun mergeFrom(other: BodyMatchElement?): BodyMatchElement
+    abstract fun finalize()
 
     class BodyMatchObject(
         internal val entries: HashMap<String, BodyMatchElement> = HashMap()
@@ -48,6 +49,12 @@ sealed class BodyMatchElement {
             return this
         }
 
+        override fun finalize() {
+            entries.forEach {
+                it.value.finalize()
+            }
+        }
+
         override fun toString(): String {
             return entries.entries.joinToString(separator = ",", prefix = "{", postfix = "}", truncated = "…", limit = MAX_OBJECT_STRING_LENGTH) {
                 "${it.key}:${it.value}"
@@ -55,22 +62,17 @@ sealed class BodyMatchElement {
         }
     }
 
-    abstract class BodyMatchArray(
-        internal var element: BodyMatchElement?
-    ) : BodyMatchElement() {
-
-        //We may decide to change out the array matching to index based elements later.
-        @Suppress("UNUSED_PARAMETER")
-        open fun at(index: Int): BodyMatchElement? {
-            return element
-        }
-
-        override fun toString(): String {
-            return "[$element]"
-        }
+    abstract class BodyMatchArray : BodyMatchElement() {
+        abstract fun at(index: Int): BodyMatchElement?
     }
 
-    class BodyMatchAbsoluteArray(element: BodyMatchElement?) : BodyMatchArray(element) {
+    class BodyMatchAbsoluteArray(
+        internal val elements: MutableMap<Int, BodyMatchElement>
+    ) : BodyMatchArray() {
+
+        override fun at(index: Int): BodyMatchElement? {
+            return elements[index] ?: elements[-1]
+        }
 
         override fun equalsType(other: BodyMatchElement): Boolean {
             return other is BodyMatchAbsoluteArray
@@ -78,59 +80,120 @@ sealed class BodyMatchElement {
 
         override fun mergeFrom(other: BodyMatchElement?): BodyMatchElement {
             if (other is BodyMatchAbsoluteArray) {
-                element = element?.mergeFrom(other.element) ?: other.element
+                other.elements.forEach {
+                    elements[it.key] = elements[it.key]?.mergeFrom(it.value) ?: it.value
+                }
             } else {
                 throw PactBuildException("Found conflicting types while merging $other into the array $this.")
             }
             return this
         }
+
+        override fun finalize() {
+            val genericElement = elements.remove(-1)
+            if (genericElement != null) {
+               elements.mapValues {
+                   it.value.mergeFrom(genericElement)
+               }
+               elements[-1] = genericElement
+            }
+        }
+
+        override fun toString(): String {
+            return "[${elements.size}]"
+        }
     }
 
     class BodyMatchMinArray(
-        element: BodyMatchElement?,
+        private var genericElement: BodyMatchElement?,
         internal val minCount: Int
-    ) : BodyMatchArray(element) {
+    ) : BodyMatchArray() {
+
+        override fun at(index: Int): BodyMatchElement? {
+            return genericElement
+        }
 
         override fun equalsType(other: BodyMatchElement): Boolean {
             return other is BodyMatchMinArray
         }
 
         override fun mergeFrom(other: BodyMatchElement?): BodyMatchElement {
-            element = when (other) {
+            genericElement = when (other) {
                 is BodyMatchMinArray -> {
                     if (minCount != other.minCount) {
                         throw PactBuildException("Found conflicting minCount $minCount & ${other.minCount} while merging $other into the min array $this.")
                     }
-                    element?.mergeFrom(other.element) ?: other.element
+                    genericElement?.mergeFrom(other.genericElement) ?: other.genericElement
                 }
-                is BodyMatchAbsoluteArray -> element?.mergeFrom(other.element) ?: other.element
+                is BodyMatchAbsoluteArray -> {
+                    if(other.elements.size > 1) {
+                        throw PactBuildException("Only one absolute element of $other can be used in this generic element $this!")
+                    }
+                    val otherValue = other.elements.entries.firstOrNull()?.value
+                    if(otherValue != null) {
+                        genericElement?.mergeFrom(otherValue) ?: otherValue
+                    } else {
+                        genericElement
+                    }
+
+                }
                 else -> throw PactBuildException("Found conflicting types while merging $other into the min array $this.")
             }
             return this
         }
+
+        override fun finalize() {
+            genericElement?.finalize()
+        }
+
+        override fun toString(): String {
+            return "[${genericElement}]"
+        }
     }
 
     class BodyMatchMaxArray(
-        element: BodyMatchElement?,
+        private var genericElement: BodyMatchElement?,
         internal val maxCount: Int
-    ) : BodyMatchArray(element) {
+    ) : BodyMatchArray() {
+
+        override fun at(index: Int): BodyMatchElement? {
+            return genericElement
+        }
 
         override fun equalsType(other: BodyMatchElement): Boolean {
             return other is BodyMatchMaxArray
         }
 
         override fun mergeFrom(other: BodyMatchElement?): BodyMatchElement {
-            element = when (other) {
+            genericElement = when (other) {
                 is BodyMatchMaxArray -> {
                     if (maxCount != other.maxCount) {
                         throw PactBuildException("Found conflicting maxCount $maxCount & ${other.maxCount} while merging $other into the max array $this.")
                     }
-                    element?.mergeFrom(other.element) ?: other.element
+                    genericElement?.mergeFrom(other.genericElement) ?: other.genericElement
                 }
-                is BodyMatchAbsoluteArray -> element?.mergeFrom(other.element) ?: other.element
+                is BodyMatchAbsoluteArray -> {
+                    if(other.elements.size > 1) {
+                        throw PactBuildException("Only one absolute element of $other can be used in this generic element $this!")
+                    }
+                    val otherValue = other.elements.entries.firstOrNull()?.value
+                    if(otherValue != null) {
+                        genericElement?.mergeFrom(otherValue) ?: otherValue
+                    } else {
+                        genericElement
+                    }
+                }
                 else -> throw PactBuildException("Found conflicting types while merging $other into the max array $this.")
             }
             return this
+        }
+
+        override fun finalize() {
+            genericElement?.finalize()
+        }
+
+        override fun toString(): String {
+            return "[${genericElement}]"
         }
     }
 
@@ -150,11 +213,13 @@ sealed class BodyMatchElement {
             }
         }
 
+        override fun finalize() { }
+
         override fun toString(): String {
             if (regex.length < MAX_ITEM_STRING_LENGTH) {
-                return regex
+                return "\"$regex\""
             }
-            return "${regex.take(MAX_ITEM_STRING_LENGTH - 1)}…"
+            return "\"${regex.take(MAX_ITEM_STRING_LENGTH - 1)}…\""
         }
     }
 
@@ -181,11 +246,11 @@ sealed class BodyMatchElement {
             if (startingPoints.size > 1) {
                 throw PactBuildException("There was more than one root defined by @MatchBody annotations:\n${startingPoints.joinToString(separator = "\n")}")
             }
-            return startingPoints.firstOrNull()
+            return startingPoints.firstOrNull()//?.apply { finalize() }
         }
 
         private fun splitPath(path: String): List<String> {
-            val pathElements = path.split('.')
+            val pathElements = path.split('.', '[')
             if (pathElements.isEmpty()) {
                 throw PactBuildException("The path on a @MatchBody may not be empty. It must be separated by '.' characters.")
             }
@@ -198,7 +263,20 @@ sealed class BodyMatchElement {
         private fun buildMatch(pathElements: List<String>, startElement: BodyMatchElement): BodyMatchElement {
             return pathElements.fold(startElement) { lastMatch, pathElement ->
                 when {
-                    pathElement.startsWith("[") -> BodyMatchAbsoluteArray(lastMatch)
+                    pathElement.endsWith("]") -> {
+                        if(pathElement.length < 2) {
+                            throw PactBuildException("The path element $pathElement does not contain an index. Wildcards are allowed.")
+                        }
+                        val pathValue = pathElement.substring(0, pathElement.length - 1)
+                        val itemIndex = if(pathValue == "*") {
+                            -1
+                        } else {
+                            pathValue.toIntOrNull() ?: throw PactBuildException("The path element $pathElement does not contain a integer index. Wildcards are allowed.")
+                        }
+                        BodyMatchAbsoluteArray(mutableMapOf(
+                            Pair(itemIndex, lastMatch)
+                        ))
+                    }
                     pathElement == "$" -> lastMatch
                     else -> BodyMatchObject(hashMapOf(Pair(pathElement, lastMatch)))
                 }

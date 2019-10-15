@@ -57,7 +57,8 @@
             "$.jkl[0]": {
               "matchers": [
                 {
-                  "match": "type"
+                  "match": "regex",
+                  "regex": "Hello.*"
                 }
               ],
               "combine": "AND"
@@ -65,7 +66,8 @@
             "$.jkl[1]": {
               "matchers": [
                 {
-                  "match": "type"
+                  "match": "regex",
+                  "regex": "Hello.*"
                 }
               ],
               "combine": "AND"
