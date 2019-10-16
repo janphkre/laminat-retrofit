@@ -49,8 +49,8 @@ class RetrofitPactDslWithParams(
                     matchQuery(parameter.first, regex, parameter.second)
                 }
             }
-        //TODO not accounting for MultiPart or FormUrlEncoded at the moment?
-        if (retrofitRequest.body == null) {
+        //TODO not accounting for MultiPart at the moment?
+        if (retrofitRequest.body?.contentType() == null) {
             return intermediatePact
         }
         val dslBody = RetrofitPactDslBodyCreator(
