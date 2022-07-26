@@ -15,10 +15,10 @@ import com.janphkre.laminat.retrofit.annotations.header.MatchHeader
 import com.janphkre.laminat.retrofit.annotations.header.MatchHeaders
 import com.janphkre.laminat.retrofit.annotations.query.MatchQuery
 import com.janphkre.laminat.retrofit.annotations.query.MatchQuerys
+import java.lang.reflect.Method
 import retrofit2.http.Field
 import retrofit2.http.Header
 import retrofit2.http.Query
-import java.lang.reflect.Method
 
 class Annotations(
     private val retrofitMethod: Method
@@ -48,11 +48,13 @@ class Annotations(
         { values.map { Pair(it.path, MinArray(it.minCount)) } },
         { Pair(path, MinArray(minCount)) },
         { "$.$value" }
-    ).plus(getRegexes<MatchBodyMaxArrays, MatchBodyMaxArray, Field, IMatchArray>(
-        { values.map { Pair(it.path, MaxArray(it.maxCount)) } },
-        { Pair(path, MaxArray(maxCount)) },
-        { "$.$value" }
-    ))
+    ).plus(
+        getRegexes<MatchBodyMaxArrays, MatchBodyMaxArray, Field, IMatchArray>(
+            { values.map { Pair(it.path, MaxArray(it.maxCount)) } },
+            { Pair(path, MaxArray(maxCount)) },
+            { "$.$value" }
+        )
+    )
     val pathRegex = getMethodPathRegex()
 
     /**
@@ -70,8 +72,13 @@ class Annotations(
         transformReplacement: V.() -> String
     ): Map<String, W> {
         val methodRegexes = getMethodRegexes(transformMethodTarget)
-        val parameterRegexes = getMethodParameterRegexes(transformParameterTarget, transformReplacement)
-        val resultMap = HashMap<String, W>(methodRegexes.size + parameterRegexes.size).apply {
+        val parameterRegexes = getMethodParameterRegexes(
+            transformParameterTarget,
+            transformReplacement
+        )
+        val resultMap = HashMap<String, W>(
+            methodRegexes.size + parameterRegexes.size
+        ).apply {
             putAll(methodRegexes)
             putAll(parameterRegexes)
         }
@@ -81,11 +88,15 @@ class Annotations(
         return resultMap
     }
 
-    private inline fun <reified T, W> getMethodRegexes(transformTarget: T.() -> List<Pair<String, W>>): List<Pair<String, W>> {
-        val methodRegexes = retrofitMethod.annotations.filterIsInstance<T>().flatMap(transformTarget)
+    private inline fun <reified T, W> getMethodRegexes(
+        transformTarget: T.() -> List<Pair<String, W>>
+    ): List<Pair<String, W>> {
+        val methodRegexes = retrofitMethod.annotations
+            .filterIsInstance<T>()
+            .flatMap(transformTarget)
         methodRegexes.forEach {
             if (it.first.isBlank()) {
-                raiseException("@${T::class.java.simpleName} requires a key if specified on the method directly")
+                raiseException("@${T::class.java.simpleName} requires a key if specified on the method directly") // ktlint-disable max-line-length
             }
         }
         return methodRegexes
@@ -96,13 +107,16 @@ class Annotations(
         transformReplacement: V.() -> String
     ): List<Pair<String, W>> {
         return retrofitMethod.parameterAnnotations.flatMap { parameterAnnotations ->
-            val replacementKey = parameterAnnotations.filterIsInstance(V::class.java).firstOrNull()?.transformReplacement()
+            val replacementKey = parameterAnnotations
+                .filterIsInstance(V::class.java)
+                .firstOrNull()
+                ?.transformReplacement()
             parameterAnnotations.filterIsInstance(U::class.java).map { targetAnnotation ->
                 val targetRegex = targetAnnotation.transformParameterTarget()
                 when {
                     targetRegex.first.isNotBlank() -> targetRegex
                     replacementKey != null -> Pair(replacementKey, targetRegex.second)
-                    else -> raiseException("@${U::class.java.simpleName} is specified on a parameter without an header key")
+                    else -> raiseException("@${U::class.java.simpleName} is specified on a parameter without an header key") // ktlint-disable max-line-length
                 }
             }
         }

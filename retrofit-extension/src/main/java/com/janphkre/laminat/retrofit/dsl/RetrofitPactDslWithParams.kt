@@ -7,8 +7,8 @@ import au.com.dius.pact.consumer.dsl.PactDslResponse
 import com.janphkre.laminat.retrofit.annotations.Annotations
 import com.janphkre.laminat.retrofit.body.BodyMatchElement
 import com.janphkre.laminat.retrofit.body.RetrofitPactDslBodyCreator
-import okhttp3.RetrofitPactRequestWithParams
 import java.lang.reflect.Method
+import okhttp3.RetrofitPactRequestWithParams
 
 class RetrofitPactDslWithParams(
     private val pactDslRequestWithoutPath: PactDslRequestWithoutPath,
@@ -49,7 +49,7 @@ class RetrofitPactDslWithParams(
                     matchQuery(parameter.first, regex, parameter.second)
                 }
             }
-        //TODO not accounting for MultiPart at the moment?
+        // TODO not accounting for MultiPart at the moment?
         if (retrofitRequest.body?.contentType() == null) {
             return intermediatePact
         }

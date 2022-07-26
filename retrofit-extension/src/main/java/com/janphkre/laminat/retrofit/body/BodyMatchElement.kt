@@ -44,7 +44,7 @@ sealed class BodyMatchElement {
                         ?: entries.put(keyValuePair.key, keyValuePair.value)
                 }
             } else {
-                throw PactBuildException("Found conflicting types while merging $other into the object $this.")
+                throw PactBuildException("Found conflicting types while merging $other into the object $this.") // ktlint-disable max-line-length
             }
             return this
         }
@@ -56,7 +56,13 @@ sealed class BodyMatchElement {
         }
 
         override fun toString(): String {
-            return entries.entries.joinToString(separator = ",", prefix = "{", postfix = "}", truncated = "…", limit = MAX_OBJECT_STRING_LENGTH) {
+            return entries.entries.joinToString(
+                separator = ",",
+                prefix = "{",
+                postfix = "}",
+                truncated = "…",
+                limit = MAX_OBJECT_STRING_LENGTH
+            ) {
                 "${it.key}:${it.value}"
             }
         }
@@ -84,7 +90,7 @@ sealed class BodyMatchElement {
                     elements[it.key] = elements[it.key]?.mergeFrom(it.value) ?: it.value
                 }
             } else {
-                throw PactBuildException("Found conflicting types while merging $other into the array $this.")
+                throw PactBuildException("Found conflicting types while merging $other into the array $this.") // ktlint-disable max-line-length
             }
             return this
         }
@@ -92,10 +98,10 @@ sealed class BodyMatchElement {
         override fun finalize() {
             val genericElement = elements.remove(-1)
             if (genericElement != null) {
-               elements.mapValues {
-                   it.value.mergeFrom(genericElement)
-               }
-               elements[-1] = genericElement
+                elements.mapValues {
+                    it.value.mergeFrom(genericElement)
+                }
+                elements[-1] = genericElement
             }
         }
 
@@ -121,23 +127,22 @@ sealed class BodyMatchElement {
             genericElement = when (other) {
                 is BodyMatchMinArray -> {
                     if (minCount != other.minCount) {
-                        throw PactBuildException("Found conflicting minCount $minCount & ${other.minCount} while merging $other into the min array $this.")
+                        throw PactBuildException("Found conflicting minCount $minCount & ${other.minCount} while merging $other into the min array $this.") // ktlint-disable max-line-length
                     }
                     genericElement?.mergeFrom(other.genericElement) ?: other.genericElement
                 }
                 is BodyMatchAbsoluteArray -> {
-                    if(other.elements.size > 1) {
-                        throw PactBuildException("Only one absolute element of $other can be used in this generic element $this!")
+                    if (other.elements.size > 1) {
+                        throw PactBuildException("Only one absolute element of $other can be used in this generic element $this!") // ktlint-disable max-line-length
                     }
                     val otherValue = other.elements.entries.firstOrNull()?.value
-                    if(otherValue != null) {
+                    if (otherValue != null) {
                         genericElement?.mergeFrom(otherValue) ?: otherValue
                     } else {
                         genericElement
                     }
-
                 }
-                else -> throw PactBuildException("Found conflicting types while merging $other into the min array $this.")
+                else -> throw PactBuildException("Found conflicting types while merging $other into the min array $this.") // ktlint-disable max-line-length
             }
             return this
         }
@@ -147,7 +152,7 @@ sealed class BodyMatchElement {
         }
 
         override fun toString(): String {
-            return "[${genericElement}]"
+            return "[$genericElement]"
         }
     }
 
@@ -168,22 +173,22 @@ sealed class BodyMatchElement {
             genericElement = when (other) {
                 is BodyMatchMaxArray -> {
                     if (maxCount != other.maxCount) {
-                        throw PactBuildException("Found conflicting maxCount $maxCount & ${other.maxCount} while merging $other into the max array $this.")
+                        throw PactBuildException("Found conflicting maxCount $maxCount & ${other.maxCount} while merging $other into the max array $this.") // ktlint-disable max-line-length
                     }
                     genericElement?.mergeFrom(other.genericElement) ?: other.genericElement
                 }
                 is BodyMatchAbsoluteArray -> {
-                    if(other.elements.size > 1) {
-                        throw PactBuildException("Only one absolute element of $other can be used in this generic element $this!")
+                    if (other.elements.size > 1) {
+                        throw PactBuildException("Only one absolute element of $other can be used in this generic element $this!") // ktlint-disable max-line-length
                     }
                     val otherValue = other.elements.entries.firstOrNull()?.value
-                    if(otherValue != null) {
+                    if (otherValue != null) {
                         genericElement?.mergeFrom(otherValue) ?: otherValue
                     } else {
                         genericElement
                     }
                 }
-                else -> throw PactBuildException("Found conflicting types while merging $other into the max array $this.")
+                else -> throw PactBuildException("Found conflicting types while merging $other into the max array $this.") // ktlint-disable max-line-length
             }
             return this
         }
@@ -193,7 +198,7 @@ sealed class BodyMatchElement {
         }
 
         override fun toString(): String {
-            return "[${genericElement}]"
+            return "[$genericElement]"
         }
     }
 
@@ -207,9 +212,9 @@ sealed class BodyMatchElement {
 
         override fun mergeFrom(other: BodyMatchElement?): BodyMatchString {
             if (other is BodyMatchString) {
-                throw PactBuildException("Merging of regexes is unsupported. Tried to merge \"$regex\" and \"${other.regex}\"")
+                throw PactBuildException("Merging of regexes is unsupported. Tried to merge \"$regex\" and \"${other.regex}\"") // ktlint-disable max-line-length
             } else {
-                throw PactBuildException("Found conflicting types while merging $other into the regex \"$regex\".")
+                throw PactBuildException("Found conflicting types while merging $other into the regex \"$regex\".") // ktlint-disable max-line-length
             }
         }
 
@@ -228,54 +233,67 @@ sealed class BodyMatchElement {
         private const val MAX_ITEM_STRING_LENGTH = 7
         private const val MAX_OBJECT_STRING_LENGTH = 21
 
-        fun from(matchRegexes: Map<String, String>, matchArrays: Map<String, IMatchArray>): BodyMatchElement? {
+        fun from(
+            matchRegexes: Map<String, String>,
+            matchArrays: Map<String, IMatchArray>
+        ): BodyMatchElement? {
             val startingPoints = LinkedList<BodyMatchElement>()
             matchArrays.forEach { matchArrayPair ->
                 val startElement = when (val arrayValue = matchArrayPair.value) {
                     is MaxArray -> BodyMatchMaxArray(null, arrayValue.maxCount)
                     is MinArray -> BodyMatchMinArray(null, arrayValue.minCount)
-                    else -> throw PactBuildException("Unsupported array type ${arrayValue.javaClass.name}")
+                    else -> throw PactBuildException(
+                        "Unsupported array type ${arrayValue.javaClass.name}"
+                    )
                 }
                 val resultMatch = buildMatch(splitPath(matchArrayPair.key), startElement)
                 startingPoints.addMatch(resultMatch)
             }
             matchRegexes.forEach { matchRegexPair ->
-                val resultMatch = buildMatch(splitPath(matchRegexPair.key), BodyMatchString(matchRegexPair.value))
+                val resultMatch = buildMatch(
+                    splitPath(matchRegexPair.key),
+                    BodyMatchString(matchRegexPair.value)
+                )
                 startingPoints.addMatch(resultMatch)
             }
             if (startingPoints.size > 1) {
-                throw PactBuildException("There was more than one root defined by @MatchBody annotations:\n${startingPoints.joinToString(separator = "\n")}")
+                throw PactBuildException("There was more than one root defined by @MatchBody annotations:\n${startingPoints.joinToString(separator = "\n")}") // ktlint-disable max-line-length
             }
-            return startingPoints.firstOrNull()//?.apply { finalize() }
+            return startingPoints.firstOrNull() // ?.apply { finalize() }
         }
 
         private fun splitPath(path: String): List<String> {
             val pathElements = path.split('.', '[')
             if (pathElements.isEmpty()) {
-                throw PactBuildException("The path on a @MatchBody may not be empty. It must be separated by '.' characters.")
+                throw PactBuildException("The path on a @MatchBody may not be empty. It must be separated by '.' characters.") // ktlint-disable max-line-length
             }
             if (pathElements.first() != "$") {
-                throw PactBuildException("The path on a @MatchBody must start with the root specified by the '$' character. It must be separated by '.' characters.")
+                throw PactBuildException("The path on a @MatchBody must start with the root specified by the '$' character. It must be separated by '.' characters.") // ktlint-disable max-line-length
             }
             return pathElements.reversed()
         }
 
-        private fun buildMatch(pathElements: List<String>, startElement: BodyMatchElement): BodyMatchElement {
+        private fun buildMatch(
+            pathElements: List<String>,
+            startElement: BodyMatchElement
+        ): BodyMatchElement {
             return pathElements.fold(startElement) { lastMatch, pathElement ->
                 when {
                     pathElement.endsWith("]") -> {
-                        if(pathElement.length < 2) {
-                            throw PactBuildException("The path element $pathElement does not contain an index. Wildcards are allowed.")
+                        if (pathElement.length < 2) {
+                            throw PactBuildException("The path element $pathElement does not contain an index. Wildcards are allowed.") // ktlint-disable max-line-length
                         }
                         val pathValue = pathElement.substring(0, pathElement.length - 1)
-                        val itemIndex = if(pathValue == "*") {
+                        val itemIndex = if (pathValue == "*") {
                             -1
                         } else {
-                            pathValue.toIntOrNull() ?: throw PactBuildException("The path element $pathElement does not contain a integer index. Wildcards are allowed.")
+                            pathValue.toIntOrNull() ?: throw PactBuildException("The path element $pathElement does not contain a integer index. Wildcards are allowed.") // ktlint-disable max-line-length
                         }
-                        BodyMatchAbsoluteArray(mutableMapOf(
-                            Pair(itemIndex, lastMatch)
-                        ))
+                        BodyMatchAbsoluteArray(
+                            mutableMapOf(
+                                Pair(itemIndex, lastMatch)
+                            )
+                        )
                     }
                     pathElement == "$" -> lastMatch
                     else -> BodyMatchObject(hashMapOf(Pair(pathElement, lastMatch)))

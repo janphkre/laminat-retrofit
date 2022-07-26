@@ -1,11 +1,11 @@
 package retrofit2
 
 import au.com.dius.pact.external.PactBuildException
+import java.lang.reflect.Method
 import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.RetrofitPactRequestWithParams
 import org.apache.http.entity.ContentType
-import java.lang.reflect.Method
 
 class RetrofitPactRequest(
     private val retrofit: Retrofit,
@@ -41,9 +41,13 @@ class RetrofitPactRequest(
 
     fun applyParameterValues(vararg args: Any?): RetrofitPactRequestWithParams {
         var argumentCount = args.size
-        require(argumentCount == parameterHandlers.size) { "Argument count ($argumentCount) doesn't match expected count (${parameterHandlers.size})" }
-        val requestBuilder = RequestBuilder(httpMethod, retrofit.baseUrl, relativeUrl,
-            headers, contentType, hasBody, isFormEncoded, isMultipart)
+        require(argumentCount == parameterHandlers.size) {
+            "Argument count $argumentCount doesn't match expected count ${parameterHandlers.size}"
+        }
+        val requestBuilder = RequestBuilder(
+            httpMethod, retrofit.baseUrl, relativeUrl,
+            headers, contentType, hasBody, isFormEncoded, isMultipart
+        )
         if (isKotlinSuspendFunction) {
             // The Continuation is the last parameter and the handlers array contains null at that index.
             argumentCount--
@@ -55,8 +59,14 @@ class RetrofitPactRequest(
 
         val request = requestBuilder.get()
         when {
-            isFormEncoded -> request.addHeader(ContentType.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.mimeType.toString())
-            isMultipart -> request.addHeader(ContentType.CONTENT_TYPE, ContentType.MULTIPART_FORM_DATA.mimeType.toString())
+            isFormEncoded -> request.addHeader(
+                ContentType.CONTENT_TYPE,
+                ContentType.APPLICATION_FORM_URLENCODED.mimeType.toString()
+            )
+            isMultipart -> request.addHeader(
+                ContentType.CONTENT_TYPE,
+                ContentType.MULTIPART_FORM_DATA.mimeType.toString()
+            )
         }
         return RetrofitPactRequestWithParams(request.build())
     }

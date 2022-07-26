@@ -18,7 +18,8 @@ class RetrofitPactDslBodyCreator(
         val contentTypeString = retrofitBody.contentType()?.let { "${it.type()}/${it.subtype()}" }
         return Buffer().use { retrofitBodyBuffer ->
             retrofitBody.writeTo(retrofitBodyBuffer)
-            val dslBodyConverter: DslBodyConverter = dslBodies[contentTypeString] ?: DslPlainTextBodyConverter
+            val dslBodyConverter: DslBodyConverter =
+                dslBodies[contentTypeString] ?: DslPlainTextBodyConverter
             dslBodyConverter.toPactDsl(retrofitBodyBuffer, bodyMatches)
         }
     }
