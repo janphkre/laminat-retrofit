@@ -12,10 +12,8 @@
         "method": "POST",
         "path": "/api/v1/emptyExample",
         "headers": {
-          "X-Foo": "Bar",
-          "Content-Type": "application/json; charset\u003dUTF-8"
+          "X-Foo": "Bar"
         },
-        "body": "",
         "matchingRules": {
           "header": {
             "X-Foo": {
@@ -27,8 +25,7 @@
               ],
               "combine": "AND"
             }
-          },
-          "body": {}
+          }
         }
       },
       "response": {

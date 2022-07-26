@@ -1,7 +1,10 @@
 package com.janphkre.laminat.retrofit
 
+import au.com.dius.pact.BuildConfig
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.external.PactJsonifier
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArray
 import com.janphkre.laminat.retrofit.annotations.body.MatchBodyMinArrays
 import com.janphkre.laminat.retrofit.annotations.body.MatchBodyRegexes
@@ -65,7 +68,7 @@ class RetrofitDslTest {
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("http://localhost")
         .build()
-    private val expectedPact = "testretrofitconsumer:testretrofitprovider.json"
+    private val expectedPactName = "testretrofitconsumer:testretrofitprovider.json"
 
     @Test
     fun retrofit_InstanciatePact_MatchesExampleRequest() {
@@ -83,11 +86,12 @@ class RetrofitDslTest {
         Assert.assertNotNull(pactInteraction)
 
         PactJsonifier.generateJson(listOf(pactInteraction), File("pacts"))
-        val outputPactFile = File("pacts/$expectedPact")
+        val outputPactFile = File("pacts/$expectedPactName")
         Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
 
         val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
-        val expectedPact = File("src/test/assets/pact:jsonexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPactJson = File("src/test/assets/pact___jsonexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = updateVersion(expectedPactJson)
         Assert.assertEquals("Generated pact does not match expectations!", expectedPact, outputPact)
     }
 
@@ -98,7 +102,7 @@ class RetrofitDslTest {
             .uponReceiving("POST form example")
             .on(retrofitInstance)
             .match(TestApi::postFormExample)
-            .withParameters("Hello1","Hello2")
+            .withParameters("Hello1", "Hello2")
             .willRespondWith()
             .status(200)
             .body("{}")
@@ -107,11 +111,12 @@ class RetrofitDslTest {
         Assert.assertNotNull(pactInteraction)
 
         PactJsonifier.generateJson(listOf(pactInteraction), File("pacts"))
-        val outputPactFile = File("pacts/$expectedPact")
+        val outputPactFile = File("pacts/$expectedPactName")
         Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
 
         val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
-        val expectedPact = File("src/test/assets/pact:formexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPactJson = File("src/test/assets/pact___formexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = updateVersion(expectedPactJson)
         Assert.assertEquals("Generated pact does not match expectations!", expectedPact, outputPact)
     }
 
@@ -130,11 +135,21 @@ class RetrofitDslTest {
         Assert.assertNotNull(pactInteraction)
 
         PactJsonifier.generateJson(listOf(pactInteraction), File("pacts"))
-        val outputPactFile = File("pacts/$expectedPact")
+        val outputPactFile = File("pacts/$expectedPactName")
         Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
 
         val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
-        val expectedPact = File("src/test/assets/pact:emptyexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPactJson = File("src/test/assets/pact___emptyexample.json").readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = updateVersion(expectedPactJson)
         Assert.assertEquals("Generated pact does not match expectations!", expectedPact, outputPact)
+    }
+
+    private fun updateVersion(expectedPactJson: String): String {
+        val gson = GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+        val expectedPactTree = gson.fromJson<JsonObject>(expectedPactJson, JsonObject::class.java)
+        expectedPactTree.getAsJsonObject("metadata").getAsJsonObject("pact-laminat-android").addProperty("version", BuildConfig.VERSION_NAME)
+        return gson.toJson(expectedPactTree)
     }
 }
