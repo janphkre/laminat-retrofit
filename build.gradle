@@ -3,7 +3,7 @@
 buildscript {
 
     ext {
-        pact_version = '3.5.13'
+        pact_version = '3.5.14'
         pact_version_code = 14
         library_namespace = 'com.github.janphkre'
         library_id = 'laminat-retrofit'
@@ -11,7 +11,7 @@ buildscript {
         min_sdk_version = 14
         target_sdk_version = 30
         kotlin_version = '1.6.20'
-        gson_version = '2.9.0' //T ODO: OTHER LIBRARIES???
+        gson_version = '2.9.0'
 
         //Testing:
         test_junit_version = '4.13.2'
