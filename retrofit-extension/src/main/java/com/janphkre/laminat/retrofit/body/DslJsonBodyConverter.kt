@@ -5,20 +5,20 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import au.com.dius.pact.external.PactBuildException
-import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 import okio.Buffer
 
 object DslJsonBodyConverter : DslBodyConverter {
 
     override fun toPactDsl(retrofitBody: Buffer, bodyMatches: BodyMatchElement?): DslPart {
-        val jsonBody = retrofitBody.inputStream().use { BasePact.jsonParser.parse(it.reader()) }
+        val jsonBody = retrofitBody.inputStream().use { JsonParser.parseReader(it.reader()) }
         return jsonRootToDsl(jsonBody, bodyMatches)
     }
 
