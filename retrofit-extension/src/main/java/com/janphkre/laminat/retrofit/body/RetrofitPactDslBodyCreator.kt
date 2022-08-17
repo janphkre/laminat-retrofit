@@ -11,11 +11,11 @@ class RetrofitPactDslBodyCreator(
     private val bodyMatches: BodyMatchElement?
 ) {
 
-    fun create(): DslPart? {
+    fun create(): DslPart {
         if (retrofitBody.contentLength() == 0L) {
             return PactDslRootValue().apply { setValue("") }
         }
-        val contentTypeString = retrofitBody.contentType()?.let { "${it.type()}/${it.subtype()}" }
+        val contentTypeString = retrofitBody.contentType()?.let { "${it.type}/${it.subtype}" }
         return Buffer().use { retrofitBodyBuffer ->
             retrofitBody.writeTo(retrofitBodyBuffer)
             val dslBodyConverter: DslBodyConverter =
@@ -33,6 +33,10 @@ class RetrofitPactDslBodyCreator(
             this[ContentType.TEXT_PLAIN.mimeType] = DslPlainTextBodyConverter
         }
 
+        /**
+         * Allows to declare a DslBodyConverter for a given mime type that will be used
+         * when creating the pact from the retrofit instance.
+         */
         fun setBodyConverter(mimeType: String, converter: DslBodyConverter) {
             dslBodies[mimeType] = converter
         }

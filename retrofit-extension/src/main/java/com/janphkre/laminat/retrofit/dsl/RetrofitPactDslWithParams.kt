@@ -58,9 +58,7 @@ class RetrofitPactDslWithParams(
             BodyMatchElement.from(annotations.bodyRegexes, annotations.bodyArrays)
         ).create()
         return intermediatePact.apply {
-            if (dslBody != null) {
-                body(dslBody)
-            }
+            body(dslBody)
         }
     }
 

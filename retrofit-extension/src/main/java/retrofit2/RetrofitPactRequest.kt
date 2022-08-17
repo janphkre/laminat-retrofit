@@ -1,11 +1,11 @@
 package retrofit2
 
 import au.com.dius.pact.external.PactBuildException
-import java.lang.reflect.Method
 import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.RetrofitPactRequestWithParams
 import org.apache.http.entity.ContentType
+import java.lang.reflect.Method
 
 class RetrofitPactRequest(
     private val retrofit: Retrofit,
@@ -33,7 +33,7 @@ class RetrofitPactRequest(
         isFormEncoded = requestFactoryBuilder.isFormEncoded
         isMultipart = requestFactoryBuilder.isMultipart
         relativeUrl = requestFactoryBuilder.relativeUrl!!
-        headers = requestFactoryBuilder.headers ?: Headers.of()
+        headers = requestFactoryBuilder.headers ?: Headers.headersOf()
         contentType = requestFactoryBuilder.contentType
         parameterHandlers = requestFactoryBuilder.parameterHandlers as Array<ParameterHandler<Any?>>
         isKotlinSuspendFunction = requestFactoryBuilder.isKotlinSuspendFunction
@@ -45,8 +45,14 @@ class RetrofitPactRequest(
             "Argument count $argumentCount doesn't match expected count ${parameterHandlers.size}"
         }
         val requestBuilder = RequestBuilder(
-            httpMethod, retrofit.baseUrl, relativeUrl,
-            headers, contentType, hasBody, isFormEncoded, isMultipart
+            httpMethod,
+            retrofit.baseUrl,
+            relativeUrl,
+            headers,
+            contentType,
+            hasBody,
+            isFormEncoded,
+            isMultipart
         )
         if (isKotlinSuspendFunction) {
             // The Continuation is the last parameter and the handlers array contains null at that index.
