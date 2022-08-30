@@ -15,6 +15,7 @@ import com.janphkre.laminat.retrofit.dsl.on
 import java.io.File
 import java.nio.charset.Charset
 import org.apache.http.Consts
+import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import retrofit2.Retrofit
@@ -22,8 +23,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Url
 
 class RetrofitDslTest {
 
@@ -68,13 +71,21 @@ class RetrofitDslTest {
         )
         @Headers("X-Foo: Bar")
         fun postEmptyExample(): Something
+
+        @GET
+        fun getFullCustomUrl(@Url url: String): Something
     }
 
     private val retrofitInstance = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("http://localhost")
         .build()
-    private val expectedPactName = "testretrofitconsumer:testretrofitprovider.json"
+    private val expectedPactName = "testretrofitconsumer___testretrofitprovider.json"
+
+    @After
+    fun teardown() {
+        File("pacts").delete()
+    }
 
     @Test
     fun retrofit_InstanciatePact_MatchesExampleRequest() {
@@ -162,6 +173,36 @@ class RetrofitDslTest {
 
         val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
         val expectedPactJson = File("src/test/assets/pact___emptyexample.json")
+            .readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPact = updateVersion(expectedPactJson)
+        Assert.assertEquals(
+            "Generated pact does not match expectations!",
+            expectedPact,
+            outputPact
+        )
+    }
+
+    @Test
+    fun retrofit_InstanciatePact_MatchesUrlRequest() {
+        val pactInteraction = ConsumerPactBuilder("testretrofitconsumer")
+            .hasPactWith("testretrofitprovider")
+            .uponReceiving("GET URL example")
+            .on(retrofitInstance)
+            .match(TestApi::getFullCustomUrl)
+            .withParameters("http://example.org/example")
+            .willRespondWith()
+            .status(200)
+            .body("{}")
+            .toPact()
+
+        Assert.assertNotNull(pactInteraction)
+
+        PactJsonifier.generateJson(listOf(pactInteraction), File("pacts"))
+        val outputPactFile = File("pacts/$expectedPactName")
+        Assert.assertTrue("Pact was not generated!", outputPactFile.exists())
+
+        val outputPact = outputPactFile.readText(Charset.forName(Consts.UTF_8.name()))
+        val expectedPactJson = File("src/test/assets/pact___urlexample.json")
             .readText(Charset.forName(Consts.UTF_8.name()))
         val expectedPact = updateVersion(expectedPactJson)
         Assert.assertEquals(

@@ -16,7 +16,7 @@ class RetrofitPactRequest(
     private val hasBody: Boolean
     private val isFormEncoded: Boolean
     private val isMultipart: Boolean
-    private val relativeUrl: String
+    private val relativeUrl: String?
     private val headers: Headers
     private val contentType: MediaType?
     private val parameterHandlers: Array<ParameterHandler<Any?>>
@@ -32,7 +32,7 @@ class RetrofitPactRequest(
         hasBody = requestFactoryBuilder.hasBody
         isFormEncoded = requestFactoryBuilder.isFormEncoded
         isMultipart = requestFactoryBuilder.isMultipart
-        relativeUrl = requestFactoryBuilder.relativeUrl!!
+        relativeUrl = requestFactoryBuilder.relativeUrl
         headers = requestFactoryBuilder.headers ?: Headers.headersOf()
         contentType = requestFactoryBuilder.contentType
         parameterHandlers = requestFactoryBuilder.parameterHandlers as Array<ParameterHandler<Any?>>
